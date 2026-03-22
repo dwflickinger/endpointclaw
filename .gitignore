@@ -1,0 +1,77 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+venv/
+.env
+*.whl
+
+# C# / .NET
+bin/
+obj/
+*.suo
+*.user
+*.vs/
+*.nupkg
+packages/
+
+# Node / React UI
+node_modules/
+ui/build/
+ui/dist/
+.next/
+*.tsbuildinfo
+
+# SQLite databases (local data)
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Installer output
+installer/output/
+*.msi
+*.exe
+!scripts/*.py
+
+# Logs
+*.log
+logs/
+
+# Config files with secrets
+config.local.json
+config.local.yaml
+.env.local
+.env.production
+
+# Playbooks (proprietary — keep in private repos)
+playbooks/
+
+# Test coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Distribution / packaging
+*.tar.gz
+*.zip
