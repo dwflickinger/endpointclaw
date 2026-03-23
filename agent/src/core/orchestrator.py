@@ -544,8 +544,11 @@ class AgentOrchestrator:
         try:
             self._activity_tracker = ActivityTracker(self.config, self.db)
             logger.info("Activity tracker starting")
-            # start() runs its own internal _monitor_loop — it blocks until stopped
             await self._activity_tracker.start()
+            # start() launches an internal task and returns immediately —
+            # keep this wrapper alive until cancellation so the task persists.
+            while self._running:
+                await asyncio.sleep(5)
         except asyncio.CancelledError:
             pass
         except Exception:

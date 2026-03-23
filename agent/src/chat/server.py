@@ -306,11 +306,11 @@ class ChatServer:
 
     async def _get_status(self) -> dict[str, Any]:
         """Collect agent status for the /api/status endpoint."""
-        file_count = await self._db.get_file_count()
+        file_stats = await self._db.get_file_stats()
         sync_state = await self._db.get_sync_state() if hasattr(self._db, "get_sync_state") else {}
         return {
             "status": "connected",
-            "file_count": file_count,
+            "file_count": file_stats.get("total_files", 0),
             "sync_state": sync_state,
             "version": self._agent_version(),
             "company_id": self._config.company_id,
