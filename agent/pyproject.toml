@@ -7,7 +7,7 @@ name = "endpointclaw"
 version = "0.1.0"
 description = "EndpointClaw — Local AI agent for endpoint monitoring and assistance"
 readme = "README.md"
-license = "Proprietary"
+license = "LicenseRef-Proprietary"
 requires-python = ">=3.10"
 authors = [
     { name = "Corvex Roofing Solutions" },
