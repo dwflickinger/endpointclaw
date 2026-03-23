@@ -1,0 +1,169 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>EndpointClaw Dashboard</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script><script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script><script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0e1a;--sf:#111827;--s2:#1a2236;--sh:#1e293b;--bd:#1e293b;--pr:#3b82f6;--ac:#c05621;--ok:#22c55e;--wn:#eab308;--er:#ef4444;--tx:#e2e8f0;--mt:#64748b;--r:8px}
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx)}
+.app{display:flex;height:100vh}.sb{width:240px;background:var(--sf);border-right:1px solid var(--bd);display:flex;flex-direction:column;flex-shrink:0}
+.sb-h{padding:20px;border-bottom:1px solid var(--bd)}.sb-h h1{font-size:16px;font-weight:700;color:var(--ac)}.sb-h .sub{font-size:11px;color:var(--mt);margin-top:2px}
+.nav{padding:12px;flex:1}.ni{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r);cursor:pointer;font-size:13px;color:var(--mt);margin-bottom:2px;border:none;background:none;width:100%;text-align:left}
+.ni:hover{background:var(--sh);color:var(--tx)}.ni.a{background:var(--pr);color:#fff}.ni .ic{font-size:16px;width:20px;text-align:center}
+.ns{font-size:10px;color:var(--mt);text-transform:uppercase;letter-spacing:1px;padding:16px 12px 6px}
+.mn{flex:1;overflow-y:auto}.ph{padding:24px 32px 0;display:flex;justify-content:space-between;align-items:center}.ph h2{font-size:22px;font-weight:700}
+.pc{padding:20px 32px 32px}.cd{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:20px;margin-bottom:16px}
+.ch{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.ct{font-size:14px;font-weight:600}
+.gr{display:grid;gap:16px}.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}.g4{grid-template-columns:1fr 1fr 1fr 1fr}
+.st{text-align:center;padding:20px}.sv{font-size:32px;font-weight:700}.sl{font-size:12px;color:var(--mt);margin-top:4px}
+.sv.ok{color:var(--ok)}.sv.wn{color:var(--wn)}.sv.er{color:var(--er)}
+.bg{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600}
+.b-healthy{background:rgba(34,197,94,.15);color:var(--ok)}.b-warning{background:rgba(234,179,8,.15);color:var(--wn)}.b-critical{background:rgba(239,68,68,.15);color:var(--er)}.b-unknown{background:rgba(100,116,139,.15);color:var(--mt)}
+table{width:100%;border-collapse:collapse;font-size:13px}th{text-align:left;padding:10px 12px;color:var(--mt);font-weight:500;border-bottom:1px solid var(--bd);font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+td{padding:10px 12px;border-bottom:1px solid var(--bd)}tr:hover td{background:var(--sh)}tr{cursor:pointer}
+.btn{padding:8px 16px;border-radius:var(--r);border:1px solid var(--bd);background:var(--s2);color:var(--tx);cursor:pointer;font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{background:var(--sh)}.bp{background:var(--pr);border-color:var(--pr)}.bp:hover{opacity:.9}.bs{padding:4px 10px;font-size:12px}
+.sg{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}.sc{background:var(--s2);border-radius:var(--r);overflow:hidden;border:1px solid var(--bd)}
+.sc img{width:100%;height:180px;object-fit:cover;cursor:pointer}.sc .meta{padding:10px;font-size:12px}.sc .app{color:var(--pr);font-weight:500}.sc .time{color:var(--mt)}
+.je{width:100%;min-height:200px;padding:12px;font-family:monospace;font-size:12px;background:var(--bg);border:1px solid var(--bd);border-radius:var(--r);color:var(--tx);resize:vertical}
+.tli{display:flex;gap:12px;padding:8px 0;border-bottom:1px solid var(--bd)}.tl-t{font-size:11px;color:var(--mt);width:60px;flex-shrink:0}.tl-c{flex:1;font-size:13px}.tl-a{color:var(--pr);font-weight:500}.tl-ti{color:var(--mt);font-size:12px}
+.ld{text-align:center;padding:40px;color:var(--mt)}.sp{display:inline-block;width:20px;height:20px;border:2px solid var(--bd);border-top-color:var(--pr);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
+input[type="date"],input[type="text"],input[type="search"]{padding:6px 12px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);color:var(--tx);font-size:13px;outline:none}input:focus{border-color:var(--pr)}
+</style></head><body><div id="root"></div>
+<script type="text/babel">
+const{useState,useEffect,useRef}=React;const API='/api';
+const api=async(p,o={})=>{const r=await fetch(API+p,{...o,headers:{'Content-Type':'application/json',...o.headers}});return r.json()};
+const today=()=>new Date().toISOString().split('T')[0];
+
+function App(){const[pg,setPg]=useState('fleet');const[ep,setEp]=useState(null);
+const nav=(p,e=null)=>{setPg(p);if(e)setEp(e)};
+return(<div className="app"><Sidebar pg={pg} nav={nav}/><div className="mn">
+{pg==='fleet'&&<Fleet nav={nav}/>}{pg==='endpoint'&&<Endpoint ep={ep} nav={nav}/>}{pg==='screenshots'&&<Screenshots ep={ep}/>}
+{pg==='activity'&&<Activity ep={ep}/>}{pg==='keystrokes'&&<Keystrokes ep={ep}/>}{pg==='policies'&&<Policies ep={ep}/>}
+{pg==='files'&&<Files/>}{pg==='analytics'&&<Analytics/>}{pg==='audit'&&<Audit/>}
+</div></div>)}
+
+function Sidebar({pg,nav}){
+const items=[{id:'fleet',ic:'🖥️',l:'Fleet Overview'},{id:'files',ic:'📁',l:'File Search'},{id:'analytics',ic:'📊',l:'Analytics'},{id:'audit',ic:'📋',l:'Audit Log'}];
+return(<div className="sb"><div className="sb-h"><h1>🦀 EndpointClaw</h1><div className="sub">Owner Dashboard</div></div>
+<div className="nav"><div className="ns">Navigation</div>{items.map(i=><button key={i.id} className={`ni ${pg===i.id?'a':''}`} onClick={()=>nav(i.id)}><span className="ic">{i.ic}</span>{i.l}</button>)}</div></div>)}
+
+function Fleet({nav}){const[d,setD]=useState(null);const[h,setH]=useState(null);
+const ld=()=>{api('/fleet/endpoints').then(setD);api('/analytics/fleet-health').then(setH)};
+useEffect(()=>{ld();const i=setInterval(ld,30000);return()=>clearInterval(i)},[]);
+if(!d)return<div className="ld"><div className="sp"></div></div>;
+return(<><div className="ph"><h2>Fleet Overview</h2><button className="btn bp" onClick={ld}>↻ Refresh</button></div><div className="pc">
+{h&&<div className="gr g4" style={{marginBottom:20}}>
+<div className="cd st"><div className="sv">{h.total}</div><div className="sl">Total</div></div>
+<div className="cd st"><div className="sv ok">{h.healthy}</div><div className="sl">Healthy</div></div>
+<div className="cd st"><div className="sv wn">{h.warning}</div><div className="sl">Warning</div></div>
+<div className="cd st"><div className="sv er">{h.critical+(h.offline||0)}</div><div className="sl">Critical</div></div></div>}
+<div className="cd"><table><thead><tr><th>User</th><th>Device</th><th>Health</th><th>Heartbeat</th><th>Version</th><th>Actions</th></tr></thead>
+<tbody>{d.endpoints.map(e=><tr key={e.id} onClick={()=>nav('endpoint',e)}>
+<td><strong>{e.user_name}</strong></td><td>{e.device_name}</td>
+<td><span className={`bg b-${e.health}`}>{e.health}</span></td>
+<td>{e.seconds_since_heartbeat!=null?e.seconds_since_heartbeat+'s ago':'Never'}</td><td>{e.agent_version}</td>
+<td><button className="btn bs" onClick={v=>{v.stopPropagation();nav('screenshots',e)}}>📷</button>{' '}
+<button className="btn bs" onClick={v=>{v.stopPropagation();nav('activity',e)}}>📊</button>{' '}
+<button className="btn bs" onClick={v=>{v.stopPropagation();nav('policies',e)}}>⚙️</button></td>
+</tr>)}</tbody></table></div></div></>)}
+
+function Endpoint({ep,nav}){const[d,setD]=useState(null);
+useEffect(()=>{if(ep?.id)api(`/fleet/endpoints/${ep.id}`).then(setD)},[ep]);
+if(!ep)return<div className="ld">Select an endpoint</div>;
+return(<><div className="ph"><div><h2>{ep.user_name}</h2><span style={{color:'var(--mt)',fontSize:13}}>{ep.device_name}</span></div>
+<div style={{display:'flex',gap:8}}>
+<button className="btn" onClick={()=>nav('screenshots',ep)}>📷</button>
+<button className="btn" onClick={()=>nav('activity',ep)}>📊</button>
+<button className="btn" onClick={()=>nav('keystrokes',ep)}>⌨️</button>
+<button className="btn" onClick={()=>nav('policies',ep)}>⚙️</button>
+<button className="btn bp" onClick={()=>api('/commands/send',{method:'POST',body:JSON.stringify({endpoint_id:ep.id,command_type:'screenshot_now',payload:{}})})}>📸 Capture</button>
+</div></div><div className="pc"><div className="gr g3">
+<div className="cd st"><div className={`sv ${ep.health==='healthy'?'ok':ep.health==='warning'?'wn':'er'}`}>{(ep.health||'?').toUpperCase()}</div><div className="sl">Status</div></div>
+<div className="cd st"><div className="sv">{ep.agent_version||'—'}</div><div className="sl">Version</div></div>
+<div className="cd st"><div className="sv">{ep.seconds_since_heartbeat!=null?ep.seconds_since_heartbeat+'s':'—'}</div><div className="sl">Heartbeat</div></div></div>
+{d?.recent_heartbeats?.[0]&&<div className="cd"><div className="ct">System Metrics</div><div style={{display:'flex',gap:20,marginTop:12}}>
+<div>CPU: <strong>{d.recent_heartbeats[0].cpu_percent}%</strong></div><div>RAM: <strong>{d.recent_heartbeats[0].ram_used_mb} MB</strong></div>
+<div>Disk: <strong>{d.recent_heartbeats[0].disk_free_gb} GB free</strong></div></div></div>}</div></>)}
+
+function Screenshots({ep}){const[s,setS]=useState([]);const[dt,setDt]=useState(today());
+useEffect(()=>{if(ep?.id)api(`/screenshots/browse/${ep.id}?date=${dt}&limit=50`).then(d=>setS(d.screenshots||[]))},[ep,dt]);
+if(!ep)return<div className="ld">Select endpoint first</div>;
+return(<><div className="ph"><h2>📷 {ep.user_name}</h2><div style={{display:'flex',gap:8}}>
+<input type="date" value={dt} onChange={e=>setDt(e.target.value)}/>
+<button className="btn bp" onClick={()=>{api('/commands/send',{method:'POST',body:JSON.stringify({endpoint_id:ep.id,command_type:'screenshot_now',payload:{}})});setTimeout(()=>api(`/screenshots/browse/${ep.id}?date=${dt}`).then(d=>setS(d.screenshots||[])),5000)}}>📸 Capture Now</button>
+</div></div><div className="pc">{s.length===0?<div className="cd" style={{textAlign:'center',padding:40,color:'var(--mt)'}}>No screenshots</div>
+:<div className="sg">{s.map(x=><div key={x.id} className="sc">
+{x.image_url?<img src={x.image_url} onClick={()=>window.open(x.image_url)}/>:<div style={{height:180,background:'var(--bg)',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--mt)'}}>On endpoint</div>}
+<div className="meta"><div className="app">{x.active_application}</div><div className="time">{new Date(x.captured_at).toLocaleTimeString()} · {x.trigger_type}</div></div></div>)}</div>}</div></>)}
+
+function Activity({ep}){const[sm,setSm]=useState(null);const[tl,setTl]=useState([]);const[dt,setDt]=useState(today());
+useEffect(()=>{if(ep?.id){api(`/activity/summary/${ep.id}?date=${dt}`).then(setSm);api(`/monitoring/timeline/${ep.id}?date=${dt}&limit=100`).then(d=>setTl(d.events||[]))}},[ep,dt]);
+if(!ep)return<div className="ld">Select endpoint</div>;
+return(<><div className="ph"><h2>📊 {ep.user_name}</h2><input type="date" value={dt} onChange={e=>setDt(e.target.value)}/></div><div className="pc">
+{sm&&<><div className="gr g3" style={{marginBottom:16}}>
+<div className="cd st"><div className="sv">{sm.total_active_hours}h</div><div className="sl">Active</div></div>
+<div className="cd st"><div className="sv">{sm.event_count}</div><div className="sl">Events</div></div>
+<div className="cd st"><div className="sv">{sm.by_application?.length||0}</div><div className="sl">Apps</div></div></div>
+<div className="cd"><div className="ct">By Application</div><table style={{marginTop:12}}><thead><tr><th>App</th><th>Time</th><th>%</th></tr></thead>
+<tbody>{sm.by_application?.map(a=><tr key={a.application}><td>{a.application}</td><td>{a.duration_minutes}m</td>
+<td><div style={{display:'flex',alignItems:'center',gap:8}}><div style={{width:`${Math.min(a.percent,100)}%`,maxWidth:200,height:6,background:'var(--pr)',borderRadius:3}}></div>{a.percent}%</div></td></tr>)}</tbody></table></div></>}
+<div className="cd"><div className="ct">Timeline</div><div style={{marginTop:12,maxHeight:500,overflowY:'auto'}}>
+{tl.map(e=><div key={e.id} className="tli"><div className="tl-t">{new Date(e.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>
+<div className="tl-c"><span className="tl-a">{e.application}</span> <span className={`bg b-${e.event_type==='idle_start'?'warning':'healthy'}`}>{e.event_type}</span>
+<div className="tl-ti">{(e.window_title||'').substring(0,80)}</div></div></div>)}</div></div></div></>)}
+
+function Keystrokes({ep}){const[ch,setCh]=useState([]);const[q,setQ]=useState('');
+useEffect(()=>{if(ep?.id){const p=q?`/keystrokes/search/${ep.id}?q=${encodeURIComponent(q)}`:`/keystrokes/browse/${ep.id}`;api(p).then(d=>setCh(d.keystrokes||d.results||[]))}},[ep,q]);
+if(!ep)return<div className="ld">Select endpoint</div>;
+return(<><div className="ph"><h2>⌨️ {ep.user_name}</h2><input placeholder="Search..." value={q} onChange={e=>setQ(e.target.value)} style={{width:300}}/></div>
+<div className="pc">{ch.map(c=><div key={c.id} className="cd">
+<div className="ch"><div><span style={{color:'var(--pr)',fontWeight:500}}>{c.application}</span><span style={{color:'var(--mt)',marginLeft:8,fontSize:12}}>{(c.window_title||'').substring(0,60)}</span></div>
+<div style={{fontSize:12,color:'var(--mt)'}}>{new Date(c.chunk_start).toLocaleString()} · {c.key_count} keys</div></div>
+<pre style={{background:'var(--bg)',padding:12,borderRadius:'var(--r)',fontSize:13,whiteSpace:'pre-wrap',wordBreak:'break-all',maxHeight:200,overflowY:'auto'}}>{c.keystrokes}</pre></div>)}
+{!ch.length&&<div className="cd" style={{textAlign:'center',padding:40,color:'var(--mt)'}}>No data</div>}</div></>)}
+
+function Policies({ep}){const[pol,setPol]=useState(null);const[ed,setEd]=useState(false);const[js,setJs]=useState('');const[ok,setOk]=useState(false);
+useEffect(()=>{if(ep?.id)api(`/policies/screenshot/${ep.id}`).then(d=>{setPol(d.policy);setJs(JSON.stringify(d.policy,null,2))})},[ep]);
+const save=async()=>{try{const p=JSON.parse(js);await api(`/policies/screenshot/${ep.id}`,{method:'PUT',body:JSON.stringify(p)});setPol(p);setEd(false);setOk(true);setTimeout(()=>setOk(false),3000)}catch(e){alert('Invalid JSON')}};
+if(!ep)return<div className="ld">Select endpoint</div>;
+return(<><div className="ph"><h2>⚙️ {ep.user_name}</h2>{ok&&<span style={{color:'var(--ok)',fontWeight:500}}>✓ Saved & pushed</span>}</div><div className="pc"><div className="cd">
+<div className="ch"><div className="ct">Screenshot Policy</div><button className="btn bs" onClick={()=>setEd(!ed)}>{ed?'Cancel':'✏️ Edit'}</button></div>
+{pol&&!ed&&<div className="gr g3" style={{marginBottom:12}}>
+<div><span style={{fontSize:12,color:'var(--mt)'}}>Enabled</span><br/><span className={`bg ${pol.enabled?'b-healthy':'b-critical'}`}>{pol.enabled?'YES':'NO'}</span></div>
+<div><span style={{fontSize:12,color:'var(--mt)'}}>Interval</span><br/><strong>{pol.default_interval_seconds}s</strong></div>
+<div><span style={{fontSize:12,color:'var(--mt)'}}>Quality</span><br/><strong>{pol.quality}</strong></div></div>}
+{ed&&<div><textarea className="je" value={js} onChange={e=>setJs(e.target.value)} rows={20}/>
+<div style={{marginTop:12,display:'flex',gap:8}}><button className="btn bp" onClick={save}>💾 Save & Push</button><button className="btn" onClick={()=>{setEd(false);setJs(JSON.stringify(pol,null,2))}}>Cancel</button></div></div>}
+</div></div></>)}
+
+function Files(){const[q,setQ]=useState('');const[r,setR]=useState([]);const[st,setSt]=useState(null);
+useEffect(()=>{api('/files/stats').then(setSt)},[]);
+const go=()=>{if(q)api(`/files/search?q=${encodeURIComponent(q)}`).then(d=>setR(d.files||[]))};
+return(<><div className="ph"><h2>📁 File Search</h2></div><div className="pc">
+{st&&<div className="gr g3" style={{marginBottom:16}}>
+<div className="cd st"><div className="sv">{(st.total_files||0).toLocaleString()}</div><div className="sl">Files</div></div>
+<div className="cd st"><div className="sv">{st.total_size_gb} GB</div><div className="sl">Size</div></div>
+<div className="cd st"><div className="sv">{Object.keys(st.by_type||{}).length}</div><div className="sl">Types</div></div></div>}
+<div style={{display:'flex',gap:8,marginBottom:16}}>
+<input style={{flex:1,padding:'10px 14px',fontSize:14}} placeholder="Search files across all endpoints..." value={q} onChange={e=>setQ(e.target.value)} onKeyDown={e=>e.key==='Enter'&&go()}/>
+<button className="btn bp" onClick={go}>Search</button></div>
+{r.length>0&&<div className="cd"><table><thead><tr><th>File</th><th>Type</th><th>Project</th><th>Path</th><th>Modified</th></tr></thead>
+<tbody>{r.map(f=><tr key={f.id}><td><strong>{f.filename}</strong></td><td><span className="bg b-healthy">{f.file_type}</span></td>
+<td>{f.inferred_project||'—'}</td><td style={{fontSize:11,color:'var(--mt)',maxWidth:300,overflow:'hidden',textOverflow:'ellipsis'}}>{f.file_path}</td>
+<td style={{fontSize:12}}>{f.modified_at?new Date(f.modified_at).toLocaleDateString():'—'}</td></tr>)}</tbody></table></div>}</div></>)}
+
+function Analytics(){const[p,setP]=useState(null);useEffect(()=>{api('/analytics/productivity').then(setP)},[]);
+return(<><div className="ph"><h2>📊 Analytics</h2></div><div className="pc">{p&&<div className="cd"><div className="ct">Team Productivity</div>
+<table style={{marginTop:12}}><thead><tr><th>User</th><th>Total</th><th>Productive</th><th>%</th></tr></thead>
+<tbody>{p.team?.map(t=><tr key={t.user_email}><td><strong>{t.user_name}</strong></td><td>{t.total_hours}h</td><td>{t.productive_hours}h</td>
+<td><div style={{display:'flex',alignItems:'center',gap:8}}><div style={{width:`${Math.min(t.productivity_pct,100)}%`,maxWidth:150,height:6,background:t.productivity_pct>70?'var(--ok)':t.productivity_pct>40?'var(--wn)':'var(--er)',borderRadius:3}}></div>{t.productivity_pct}%</div></td></tr>)}</tbody></table></div>}</div></>)}
+
+function Audit(){const[l,setL]=useState([]);useEffect(()=>{api('/analytics/audit-log?limit=100').then(setL)},[]);
+return(<><div className="ph"><h2>📋 Audit Log</h2></div><div className="pc"><div className="cd"><table><thead><tr><th>Time</th><th>Actor</th><th>Action</th><th>Target</th></tr></thead>
+<tbody>{l.map(x=><tr key={x.id}><td style={{fontSize:12}}>{new Date(x.created_at).toLocaleString()}</td>
+<td><span className={`bg ${x.actor==='openclaw'?'b-warning':'b-healthy'}`}>{x.actor}</span></td>
+<td>{x.action}</td><td>{x.target_type}:{(x.target_id||'').substring(0,8)}</td></tr>)}</tbody></table></div></div></>)}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script></body></html>
