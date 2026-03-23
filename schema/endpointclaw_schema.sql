@@ -86,14 +86,8 @@ create table if not exists endpoint_file_index (
     company_id      text references company_configs(id) on delete set null,
     synced_at       timestamptz not null default now(),
     source          text not null default 'local',
-    -- Full-text search vector — maintained by trigger
-    fts             tsvector generated always as (
-                        setweight(to_tsvector('english', coalesce(filename, '')), 'A') ||
-                        setweight(to_tsvector('english', coalesce(inferred_project, '')), 'B') ||
-                        setweight(to_tsvector('english', coalesce(inferred_customer, '')), 'B') ||
-                        setweight(to_tsvector('english', coalesce(content_extract, '')), 'C') ||
-                        setweight(to_tsvector('english', coalesce(array_to_string(tags, ' '), '')), 'B')
-                    ) stored,
+    -- Full-text search vector — maintained by trigger below
+    fts             tsvector,
     constraint uq_endpoint_file unique (endpoint_id, file_path)
 );
 
@@ -812,6 +806,36 @@ begin
 end;
 $$;
 
+
+-- ---------------------------------------------------------------------------
+-- 5b. FTS trigger for endpoint_file_index
+-- ---------------------------------------------------------------------------
+create or replace function update_file_index_fts()
+returns trigger
+language plpgsql
+as $$
+begin
+    new.fts :=
+        setweight(to_tsvector('english', coalesce(new.filename, '')), 'A') ||
+        setweight(to_tsvector('english', coalesce(new.inferred_project, '')), 'B') ||
+        setweight(to_tsvector('english', coalesce(new.inferred_customer, '')), 'B') ||
+        setweight(to_tsvector('english', coalesce(new.content_extract, '')), 'C') ||
+        setweight(to_tsvector('english', coalesce(array_to_string(new.tags, ' '), '')), 'B');
+    return new;
+end;
+$$;
+
+do $$
+begin
+    begin
+        create trigger trg_update_file_index_fts
+        before insert or update on endpoint_file_index
+        for each row execute function update_file_index_fts();
+    exception when duplicate_object then
+        null;
+    end;
+end;
+$$;
 
 -- ---------------------------------------------------------------------------
 -- 6. Storage — screenshot bucket
