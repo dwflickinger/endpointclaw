@@ -308,6 +308,18 @@ class AgentOrchestrator:
             url = f"{self.config.supabase_url}/rest/v1/endpoint_file_index"
             synced_ids: list[int] = []
             for f in unsynced_files:
+                # Tags are stored as JSON string in SQLite but Supabase
+                # expects a native Postgres text[] array.
+                raw_tags = f["tags"]
+                if isinstance(raw_tags, str):
+                    try:
+                        import json as _json
+                        raw_tags = _json.loads(raw_tags)
+                    except Exception:
+                        raw_tags = None
+                if not isinstance(raw_tags, list):
+                    raw_tags = None
+
                 payload = {
                     "endpoint_id": self.config.device_id,
                     "company_id": self.config.company_id,
@@ -320,7 +332,7 @@ class AgentOrchestrator:
                     "content_extract": f["content_extract"],
                     "inferred_project": f["inferred_project"],
                     "inferred_customer": f["inferred_customer"],
-                    "tags": f["tags"],
+                    "tags": raw_tags,
                 }
                 try:
                     resp = await self._http.post(url, json=payload, headers={**headers, "Prefer": "resolution=merge-duplicates"})
