@@ -445,6 +445,11 @@ def main() -> None:
         help="User email address",
     )
     parser.add_argument(
+        "--supabase-url",
+        default="https://twgdhuimqspfoimfmyxz.supabase.co",
+        help="Supabase project URL",
+    )
+    parser.add_argument(
         "--supabase-key",
         default="",
         help="Supabase anonymous/service key",
@@ -504,6 +509,7 @@ def main() -> None:
             company_id=company_id,
             email=email,
             api_key=api_key,
+            supabase_url=args.supabase_url,
             supabase_key=supabase_key,
             anthropic_api_key=anthropic_api_key,
         )
@@ -526,7 +532,7 @@ def main() -> None:
     # ---- Step 7: Test connection ----
     print("[7/7] Testing backend connection...")
     if supabase_key:
-        conn_ok = test_connection(DEFAULT_SUPABASE_URL, supabase_key)
+        conn_ok = test_connection(args.supabase_url, supabase_key)
     else:
         log.info("No Supabase key provided — skipping connection test")
         conn_ok = False
