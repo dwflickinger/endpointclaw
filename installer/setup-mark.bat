@@ -48,7 +48,7 @@ REM --- Install Python dependencies ---
 echo.
 echo [STEP] Installing Python dependencies...
 cd /d "%USERPROFILE%\endpointclaw\agent"
-pip install -e . --quiet
+pip install . --quiet
 if errorlevel 1 (
     echo [ERROR] pip install failed. Check Python installation.
     pause
