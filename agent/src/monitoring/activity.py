@@ -108,6 +108,9 @@ class ActivityTracker:
         if self._running:
             return
         self._running = True
+        logger.info("Activity tracker: _IS_WINDOWS=%s, _WIN32_READY=%s", _IS_WINDOWS, _WIN32_READY)
+        if not _WIN32_READY:
+            logger.warning("Activity tracker: Win32 not ready — _poll_once will no-op. Check ctypes/user32 import.")
         self._task = asyncio.create_task(self._monitor_loop())
         logger.info("Activity tracker started")
 
